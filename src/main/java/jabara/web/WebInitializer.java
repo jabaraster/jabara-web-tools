@@ -30,7 +30,7 @@ public class WebInitializer implements ServletContextListener {
      */
     @Override
     public void contextInitialized(final ServletContextEvent pSce) {
-        addServlet(pSce.getServletContext(), UploadServlet.class).addMapping("/images"); //$NON-NLS-1$
+        //        addServlet(pSce.getServletContext(), UploadServlet.class).addMapping("/images"); //$NON-NLS-1$
         initializeJersey(pSce.getServletContext());
     }
 
