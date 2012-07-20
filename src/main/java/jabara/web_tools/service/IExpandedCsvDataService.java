@@ -21,7 +21,17 @@ public interface IExpandedCsvDataService {
     /**
      * @return CSVデータ.
      * @throws NotFound
-     * @throws NotModified
      */
-    ExpandedCsvData get() throws NotFound, NotModified;
+    ExpandedCsvData get() throws NotFound;
+
+    /**
+     * @return
+     * @throws NotFound
+     */
+    ExpandedCsvData refresh() throws NotFound;
+
+    /**
+     * @param pEntity
+     */
+    void update(ExpandedCsvData pEntity);
 }

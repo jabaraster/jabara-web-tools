@@ -3,14 +3,16 @@
  */
 package jabara.web_tools.rest;
 
+import jabara.web_tools.entity.ExpandedCsvData;
 import jabara.web_tools.service.IExpandedCsvDataService;
 import jabara.web_tools.service.Injector;
 import jabara.web_tools.service.NotFound;
-import jabara.web_tools.service.NotModified;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -20,22 +22,54 @@ import javax.ws.rs.core.Response.Status;
 @Path("/blackout")
 public class BlackoutResource {
 
+    private final IExpandedCsvDataService expandedCsvDataService;
+
+    public BlackoutResource() {
+        this.expandedCsvDataService = Injector.getInstance(IExpandedCsvDataService.class);
+    }
+
     /**
      * @return 計画停電スケジュール.
      */
-    @SuppressWarnings("static-method")
     @Path("/schedule.csv")
     @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
     @GET
-    public Response getExpandedSchedule() {
+    public Response getExpandedSchedule(@QueryParam("nocache") final Boolean pNoCache) {
         try {
-            return Response.ok(Injector.getInstance(IExpandedCsvDataService.class).get().getData()).build();
+            final ExpandedCsvData data = this.expandedCsvDataService.get();
+            if (data.isLoaded()) {
+                if (isTrue(pNoCache)) {
+                    return Response.ok(data.getData()).build();
+                }
+                return Response.notModified().build();
+            }
+            data.setLoaded(true);
+            this.expandedCsvDataService.update(data);
+
+            return Response.ok(data.getData()).build();
 
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
-
-        } catch (final NotModified e) {
-            return Response.notModified().build();
         }
+    }
+
+    /**
+     * @return
+     */
+    @Path("/schedule.csv")
+    @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
+    @POST
+    public Response refresh() {
+        try {
+            final ExpandedCsvData newData = this.expandedCsvDataService.refresh();
+            return Response.ok(newData.getData()).build();
+
+        } catch (final NotFound e) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    private static boolean isTrue(final Boolean pBoolean) {
+        return pBoolean != null && pBoolean.booleanValue();
     }
 }

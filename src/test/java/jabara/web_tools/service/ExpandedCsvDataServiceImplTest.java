@@ -2,6 +2,7 @@ package jabara.web_tools.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import jabara.web_tools.entity.ExpandedCsvData;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +16,26 @@ import org.junit.Test;
  */
 @SuppressWarnings("static-method")
 public class ExpandedCsvDataServiceImplTest {
+
+    /**
+     * @throws NotFound
+     */
+    @SuppressWarnings("boxing")
+    @Test
+    public void _get_refresh() throws NotFound {
+        final IExpandedCsvDataService service = Injector.getInstance(IExpandedCsvDataService.class);
+
+        final ExpandedCsvData firstData = service.get();
+        assertThat(true, is(firstData.isFromWeb()));
+
+        final ExpandedCsvData secondData = service.get();
+        assertThat(false, is(secondData.isFromWeb()));
+
+        final ExpandedCsvData refreshData = service.refresh();
+        assertThat(true, is(refreshData.isFromWeb()));
+
+        service.refresh();
+    }
 
     /**
      * @throws Exception

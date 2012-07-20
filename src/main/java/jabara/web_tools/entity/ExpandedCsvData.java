@@ -6,6 +6,7 @@ package jabara.web_tools.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.Transient;
 
 /**
  * @author jabaraster
@@ -28,10 +29,23 @@ public class ExpandedCsvData extends EntityBase<ExpandedCsvData> {
     protected boolean         loaded           = false;
 
     /**
+     * 
+     */
+    @Transient
+    protected boolean         fromWeb;
+
+    /**
      * @return the data
      */
     public byte[] getData() {
         return this.data;
+    }
+
+    /**
+     * @return the fromWeb
+     */
+    public boolean isFromWeb() {
+        return this.fromWeb;
     }
 
     /**
@@ -46,6 +60,13 @@ public class ExpandedCsvData extends EntityBase<ExpandedCsvData> {
      */
     public void setData(final byte[] pData) {
         this.data = pData;
+    }
+
+    /**
+     * @param pFromWeb the fromWeb to set
+     */
+    public void setFromWeb(final boolean pFromWeb) {
+        this.fromWeb = pFromWeb;
     }
 
     /**

@@ -37,24 +37,56 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
      * @see jabara.web_tools.service.IExpandedCsvDataService#get()
      */
     @Override
-    public ExpandedCsvData get() throws NotFound, NotModified {
-        final EntityManager em = getEntityManager();
-        final CriteriaQuery<ExpandedCsvData> query = em.getCriteriaBuilder().createQuery(ExpandedCsvData.class);
-        query.from(ExpandedCsvData.class);
+    public ExpandedCsvData get() throws NotFound {
         try {
-            final ExpandedCsvData ret = em.createQuery(query).getSingleResult();
-            if (ret.isLoaded()) {
-                throw new NotModified();
-            }
-
-            ret.setLoaded(true);
-            update(ret);
-
-            return ret;
+            return getFromDb();
 
         } catch (final NoResultException e) {
             return getFromWebAndInsert();
         }
+    }
+
+    /**
+     * @see jabara.web_tools.service.IExpandedCsvDataService#refresh()
+     */
+    @Override
+    public ExpandedCsvData refresh() throws NotFound {
+        try {
+            final ExpandedCsvData dbData = getFromDb();
+            final ExpandedCsvData newData = getFromWeb();
+            dbData.setData(newData.getData());
+            dbData.setLoaded(false);
+            dbData.setFromWeb(true);
+            update(dbData);
+            return dbData;
+
+        } catch (final NoResultException e) {
+            return getFromWebAndInsert();
+
+        } catch (final IOException e) {
+            throw new NotFound(e);
+        } catch (final ParseException e) {
+            throw new NotFound(e);
+        }
+    }
+
+    /**
+     * @see jabara.web_tools.service.IExpandedCsvDataService#update(jabara.web_tools.entity.ExpandedCsvData)
+     */
+    @Override
+    public void update(final ExpandedCsvData pEntity) {
+        final ExpandedCsvData merged = getEntityManager().merge(pEntity);
+        merged.setData(pEntity.getData());
+        merged.setLoaded(pEntity.isLoaded());
+    }
+
+    private ExpandedCsvData getFromDb() throws NoResultException {
+        final EntityManager em = getEntityManager();
+        final CriteriaQuery<ExpandedCsvData> query = em.getCriteriaBuilder().createQuery(ExpandedCsvData.class);
+        query.from(ExpandedCsvData.class);
+        final ExpandedCsvData ret = em.createQuery(query).getSingleResult();
+        ret.setFromWeb(false);
+        return ret;
     }
 
     private ExpandedCsvData getFromWebAndInsert() throws NotFound {
@@ -68,23 +100,15 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
         }
     }
 
-    private ExpandedCsvData getFromWebAndInsertCore() throws IOException, ParseException, UnsupportedEncodingException {
-        final List<String> lines = getExpandedScheduleCore();
-        final StringBuilder sb = new StringBuilder();
-        for (final String line : lines) {
-            sb.append(line).append(LINE_SEPARATOR);
-        }
-        final byte[] data = new String(sb).getBytes(TEXT_ENCODING);
-        final ExpandedCsvData e = new ExpandedCsvData();
-        e.setData(data);
-        getEntityManager().persist(e);
-        return e;
-    }
+    private ExpandedCsvData getFromWebAndInsertCore() throws IOException, ParseException {
+        try {
+            final ExpandedCsvData e = getFromWeb();
+            getEntityManager().persist(e);
+            return e;
 
-    private void update(final ExpandedCsvData pEntity) {
-        final ExpandedCsvData merged = getEntityManager().merge(pEntity);
-        merged.setData(pEntity.getData());
-        merged.setLoaded(pEntity.isLoaded());
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     static List<String> getExpandedScheduleCore() throws IOException, ParseException {
@@ -148,6 +172,20 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
             ret.add(toGroupAlpha + String.valueOf(i));
         }
         return ret;
+    }
+
+    private static ExpandedCsvData getFromWeb() throws IOException, ParseException {
+        final List<String> lines = getExpandedScheduleCore();
+        final StringBuilder sb = new StringBuilder();
+        for (final String line : lines) {
+            sb.append(line).append(LINE_SEPARATOR);
+        }
+
+        final byte[] data = new String(sb).getBytes(TEXT_ENCODING);
+        final ExpandedCsvData e = new ExpandedCsvData();
+        e.setData(data);
+        e.setFromWeb(true);
+        return e;
     }
 
     private static String getGroupToken(final String pLine) {
