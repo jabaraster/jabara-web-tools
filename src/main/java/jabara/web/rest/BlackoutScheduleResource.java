@@ -34,6 +34,6 @@ public class BlackoutScheduleResource {
         final InputStream in = new URL("http://www2.kyuden.co.jp/kt_search/csv/201207.csv").openStream(); //$NON-NLS-1$
         final ByteArrayOutputStream mem = new ByteArrayOutputStream();
         IOUtils.copy(in, mem);
-        return new String(mem.toByteArray(), "UTF-8"); //$NON-NLS-1$
+        return new String(mem.toByteArray(), "Shift_JIS"); //$NON-NLS-1$
     }
 }
