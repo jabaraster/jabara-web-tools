@@ -36,7 +36,7 @@ public class BlackoutResource {
      */
     @Path("/schedule.csv")
     @Consumes({ "text/csv", "text/plain", "text/comma-separated-values" })
-    @Produces({ "text/csv; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
+    @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING, "text/csv; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
     @GET
     public Response getExpandedSchedule(@QueryParam("nocache") final Boolean pNoCache) {
         try {
