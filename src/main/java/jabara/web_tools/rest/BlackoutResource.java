@@ -8,6 +8,7 @@ import jabara.web_tools.service.IExpandedCsvDataService;
 import jabara.web_tools.service.Injector;
 import jabara.web_tools.service.NotFound;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -34,7 +35,8 @@ public class BlackoutResource {
      * @return 計画停電スケジュール.
      */
     @Path("/schedule.csv")
-    @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
+    @Consumes({ "text/csv", "text/plain", "text/comma-separated-values" })
+    @Produces({ "text/csv; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
     @GET
     public Response getExpandedSchedule(@QueryParam("nocache") final Boolean pNoCache) {
         try {
