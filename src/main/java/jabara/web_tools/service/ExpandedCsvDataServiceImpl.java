@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -33,31 +34,32 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
     private static final String LINE_SEPARATOR   = "\r\n";              //$NON-NLS-1$
 
     /**
-     * 
-     */
-    public ExpandedCsvDataServiceImpl() {
-        System.out.println(this.hashCode());
-    }
-
-    /**
      * @see jabara.web_tools.service.IExpandedCsvDataService#get()
      */
     @Override
-    public ExpandedCsvData get() throws NotFound {
+    public ExpandedCsvData get() throws NotFound, NotModified {
         final EntityManager em = getEntityManager();
         final CriteriaQuery<ExpandedCsvData> query = em.getCriteriaBuilder().createQuery(ExpandedCsvData.class);
         query.from(ExpandedCsvData.class);
         try {
+            final ExpandedCsvData ret = em.createQuery(query).getSingleResult();
+            if (ret.isLoaded()) {
+                throw new NotModified();
+            }
 
-            // TODO Not Modifiedへの対処
+            ret.setLoaded(true);
+            update(ret);
 
-            return em.createQuery(query).getSingleResult();
+            return ret;
+
         } catch (final NoResultException e) {
-            // 処理継続
-        }
-
-        try {
             return getFromWebAndInsert();
+        }
+    }
+
+    private ExpandedCsvData getFromWebAndInsert() throws NotFound {
+        try {
+            return getFromWebAndInsertCore();
 
         } catch (final IOException e) {
             throw new NotFound(e);
@@ -66,7 +68,7 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
         }
     }
 
-    private ExpandedCsvData getFromWebAndInsert() throws IOException, ParseException {
+    private ExpandedCsvData getFromWebAndInsertCore() throws IOException, ParseException, UnsupportedEncodingException {
         final List<String> lines = getExpandedScheduleCore();
         final StringBuilder sb = new StringBuilder();
         for (final String line : lines) {
@@ -79,14 +81,20 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
         return e;
     }
 
+    private void update(final ExpandedCsvData pEntity) {
+        final ExpandedCsvData merged = getEntityManager().merge(pEntity);
+        merged.setData(pEntity.getData());
+        merged.setLoaded(pEntity.isLoaded());
+    }
+
     static List<String> getExpandedScheduleCore() throws IOException, ParseException {
         final List<String> ret = new ArrayList<String>();
         append(ret, "201207.csv"); //$NON-NLS-1$
-        sleepMilliseconds(500);
+        sleepMilliseconds(100);
         append(ret, "201208.csv"); //$NON-NLS-1$
-        sleepMilliseconds(500);
+        sleepMilliseconds(100);
         append(ret, "201209.csv"); //$NON-NLS-1$
-        sleepMilliseconds(500);
+        sleepMilliseconds(100);
         return ret;
     }
 

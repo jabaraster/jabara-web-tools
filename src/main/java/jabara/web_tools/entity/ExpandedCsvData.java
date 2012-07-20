@@ -22,6 +22,12 @@ public class ExpandedCsvData extends EntityBase<ExpandedCsvData> {
     protected byte[]          data;
 
     /**
+     * 
+     */
+    @Column(nullable = false)
+    protected boolean         loaded           = false;
+
+    /**
      * @return the data
      */
     public byte[] getData() {
@@ -29,10 +35,24 @@ public class ExpandedCsvData extends EntityBase<ExpandedCsvData> {
     }
 
     /**
+     * @return the loaded
+     */
+    public boolean isLoaded() {
+        return this.loaded;
+    }
+
+    /**
      * @param pData the data to set
      */
     public void setData(final byte[] pData) {
         this.data = pData;
+    }
+
+    /**
+     * @param pLoaded the loaded to set
+     */
+    public void setLoaded(final boolean pLoaded) {
+        this.loaded = pLoaded;
     }
 
 }
