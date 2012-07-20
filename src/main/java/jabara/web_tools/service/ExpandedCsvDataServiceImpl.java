@@ -1,7 +1,9 @@
 /**
  * 
  */
-package jabara.web.rest;
+package jabara.web_tools.service;
+
+import jabara.web_tools.entity.ExpandedCsvData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,45 +16,77 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.criteria.CriteriaQuery;
 
 import org.apache.commons.io.IOUtils;
 
 /**
  * @author jabaraster
  */
-@Path("/blackout")
-public class BlackoutResource {
+public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvDataService {
+    private static final long   serialVersionUID = 4907375411981453116L;
 
-    private static final String ENCODING       = "UTF-8";    //$NON-NLS-1$
-    private static final String QDEN_ENCODING  = "Shift_JIS"; //$NON-NLS-1$
-    private static final String LINE_SEPARATOR = "\r\n";     //$NON-NLS-1$
+    private static final String QDEN_ENCODING    = "Shift_JIS";         //$NON-NLS-1$
+
+    private static final String LINE_SEPARATOR   = "\r\n";              //$NON-NLS-1$
 
     /**
-     * @return 計画停電スケジュール.
-     * @throws IOException
-     * @throws ParseException
+     * 
      */
-    @SuppressWarnings("static-method")
-    @Path("/schedule.csv")
-    @Produces({ "text/plain; charset=" + ENCODING })
-    @GET
-    public byte[] getExpandedSchedule() throws IOException, ParseException {
+    public ExpandedCsvDataServiceImpl() {
+        System.out.println(this.hashCode());
+    }
+
+    /**
+     * @see jabara.web_tools.service.IExpandedCsvDataService#get()
+     */
+    @Override
+    public ExpandedCsvData get() throws NotFound {
+        final EntityManager em = getEntityManager();
+        final CriteriaQuery<ExpandedCsvData> query = em.getCriteriaBuilder().createQuery(ExpandedCsvData.class);
+        query.from(ExpandedCsvData.class);
+        try {
+
+            // TODO Not Modifiedへの対処
+
+            return em.createQuery(query).getSingleResult();
+        } catch (final NoResultException e) {
+            // 処理継続
+        }
+
+        try {
+            return getFromWebAndInsert();
+
+        } catch (final IOException e) {
+            throw new NotFound(e);
+        } catch (final ParseException e) {
+            throw new NotFound(e);
+        }
+    }
+
+    private ExpandedCsvData getFromWebAndInsert() throws IOException, ParseException {
         final List<String> lines = getExpandedScheduleCore();
         final StringBuilder sb = new StringBuilder();
         for (final String line : lines) {
             sb.append(line).append(LINE_SEPARATOR);
         }
-        return new String(sb).getBytes(ENCODING);
+        final byte[] data = new String(sb).getBytes(TEXT_ENCODING);
+        final ExpandedCsvData e = new ExpandedCsvData();
+        e.setData(data);
+        getEntityManager().persist(e);
+        return e;
     }
 
     static List<String> getExpandedScheduleCore() throws IOException, ParseException {
         final List<String> ret = new ArrayList<String>();
         append(ret, "201207.csv"); //$NON-NLS-1$
+        sleepMilliseconds(500);
         append(ret, "201208.csv"); //$NON-NLS-1$
+        sleepMilliseconds(500);
         append(ret, "201209.csv"); //$NON-NLS-1$
+        sleepMilliseconds(500);
         return ret;
     }
 
@@ -115,4 +149,13 @@ public class BlackoutResource {
     private static String getPreGroupString(final String pLine) {
         return pLine.substring(0, pLine.lastIndexOf("\",\"") + 1); //$NON-NLS-1$
     }
+
+    private static void sleepMilliseconds(final int pTime) {
+        try {
+            Thread.sleep(pTime);
+        } catch (final InterruptedException e) {
+            //
+        }
+    }
+
 }

@@ -1,9 +1,5 @@
-/**
- * 
- */
-package jabara.web.rest;
+package jabara.web_tools.service;
 
-import static jabara.web.rest.BlackoutResource.parseLine;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -18,7 +14,7 @@ import org.junit.Test;
  * @author jabaraster
  */
 @SuppressWarnings("static-method")
-public class BlackoutResourceTest {
+public class ExpandedCsvDataServiceImplTest {
 
     /**
      * @throws Exception
@@ -26,7 +22,7 @@ public class BlackoutResourceTest {
     @SuppressWarnings("boxing")
     @Test
     public void _getExpandedSchedule() throws Exception {
-        final List<String> list = BlackoutResource.getExpandedScheduleCore();
+        final List<String> list = ExpandedCsvDataServiceImpl.getExpandedScheduleCore();
         final Set<String> set = new HashSet<String>(list);
         assertThat(true, is(list.size() == set.size()));
     }
@@ -37,6 +33,7 @@ public class BlackoutResourceTest {
     @Test
     public void _parseLine() throws Exception {
         final List<String> sb = new ArrayList<String>();
-        parseLine(sb, "\"2012/9/3\",\"8:30\",\"11:00\",\"B21～B30\""); //$NON-NLS-1$
+        ExpandedCsvDataServiceImpl.parseLine(sb, "\"2012/9/3\",\"8:30\",\"11:00\",\"B21～B30\""); //$NON-NLS-1$
     }
+
 }

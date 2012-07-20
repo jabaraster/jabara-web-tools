@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jabara.web.rest;
+package jabara.web_tools.rest;
 
 import javax.ws.rs.Path;
 

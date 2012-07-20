@@ -22,6 +22,7 @@
 	</properties>
 	<dependencies>
 		<!-- WICKET DEPENDENCIES -->
+		<!--
 		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket-core</artifactId>
@@ -38,7 +39,7 @@
 			<artifactId>wicket-guice</artifactId>
 			<version>${wicket.version}</version>
 		</dependency>
-
+        -->
 
 		<!-- LOGGING DEPENDENCIES - LOG4J -->
 		<dependency>
@@ -84,17 +85,23 @@
 			<version>1.8</version>
 		</dependency>
 
-		<!-- OTHER -->
+		<!-- DB ACCESS -->
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901.jdbc4</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>4.1.2</version>
+		</dependency>
+
+		<!-- OTHER -->
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

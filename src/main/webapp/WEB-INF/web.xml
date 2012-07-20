@@ -6,7 +6,7 @@
   <display-name>jabara-web-tools</display-name>
 
   <listener>
-    <listener-class>jabara.web.WebInitializer</listener-class>
+    <listener-class>jabara.web_tools.WebInitializer</listener-class>
   </listener>
 
 </web-app>

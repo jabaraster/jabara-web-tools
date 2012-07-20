@@ -1,7 +1,7 @@
 /**
  * 
  */
-package jabara.web;
+package jabara.web_tools;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -41,7 +41,7 @@ public class WebInitializer implements ServletContextListener {
     @SuppressWarnings("nls")
     private static void initializeJersey(final ServletContext pContext) {
         final ServletRegistration.Dynamic jerseyServlet = addServlet(pContext, ServletContainer.class);
-        jerseyServlet.setInitParameter("com.sun.jersey.config.property.packages", "jabara.web.rest");
+        jerseyServlet.setInitParameter("com.sun.jersey.config.property.packages", "jabara.web_tools.rest");
         jerseyServlet.setInitParameter("com.sun.jersey.api.json.POJOMappingFeature", Boolean.TRUE.toString());
         jerseyServlet.addMapping("/rest/*");
     }
