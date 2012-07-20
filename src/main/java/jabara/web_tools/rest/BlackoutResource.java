@@ -24,6 +24,8 @@ public class BlackoutResource {
 
     private final IExpandedCsvDataService expandedCsvDataService;
 
+    private static final String           CSV_PATH = "/schedule.csv"; //$NON-NLS-1$
+
     public BlackoutResource() {
         this.expandedCsvDataService = Injector.getInstance(IExpandedCsvDataService.class);
     }
@@ -56,7 +58,7 @@ public class BlackoutResource {
     /**
      * @return
      */
-    @Path("/schedule.csv")
+    @Path(CSV_PATH)
     @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
     @POST
     public Response refresh() {
