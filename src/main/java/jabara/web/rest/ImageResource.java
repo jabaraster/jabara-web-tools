@@ -11,4 +11,5 @@ import javax.ws.rs.Path;
 @Path("images")
 public class ImageResource {
 
+    // TODO 画像リサイズサービス
 }
