@@ -8,12 +8,18 @@ import jabara.web_tools.service.IExpandedCsvDataService;
 import jabara.web_tools.service.Injector;
 import jabara.web_tools.service.NotFound;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -55,6 +61,24 @@ public class BlackoutResource {
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
         }
+    }
+
+    /**
+     * @param pPath
+     * @return
+     * @throws IOException
+     */
+    @SuppressWarnings("static-method")
+    @Path("scrape")
+    @Produces({ MediaType.TEXT_HTML })
+    @GET
+    public InputStream loadFromQDenHtml(@QueryParam("path") final String pPath) throws IOException {
+        try {
+            TimeUnit.MILLISECONDS.sleep(500); // 九電サイトへの負荷対策.
+        } catch (final InterruptedException e) {
+            // 　処理なし
+        }
+        return new URL("http://www2.kyuden.co.jp/kt_search/index.php" + pPath).openStream(); //$NON-NLS-1$
     }
 
     /**
