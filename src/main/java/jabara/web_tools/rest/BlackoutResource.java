@@ -23,18 +23,43 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+
 /**
  * @author jabaraster
  */
 @Path("/blackout")
 public class BlackoutResource {
 
-    private final IExpandedCsvDataService expandedCsvDataService;
-
     private static final String           CSV_PATH = "/schedule.csv"; //$NON-NLS-1$
 
+    private final IExpandedCsvDataService expandedCsvDataService;
+
+    /**
+     * 
+     */
     public BlackoutResource() {
         this.expandedCsvDataService = Injector.getInstance(IExpandedCsvDataService.class);
+    }
+
+    /**
+     * @param pData
+     * @param pFileDetail
+     */
+    @SuppressWarnings({ "static-method", "nls" })
+    @Path("/upload")
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
+    @Produces({ MediaType.TEXT_HTML })
+    @POST
+    public void d( //
+            @FormDataParam("image") final InputStream pData //
+            , @FormDataParam("image") final FormDataContentDisposition pFileInfo //
+    ) {
+        System.out.println("♪♪♪");
+        System.out.println("♪♪♪ " + pData);
+        System.out.println("♪♪♪ " + pFileInfo);
+        System.out.println("♪♪♪");
     }
 
     /**

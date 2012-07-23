@@ -6,11 +6,13 @@
   <style>
   #sendData {
     width: 80%;
-    height: 10em;
+    height: 20em;
   }
   </style>
 </head>
 <body>
+
+  <button id="scraper">スクレイピングの開始！</button>
 
   <form action="">
     <textarea id="sendData"></textarea>
@@ -21,8 +23,14 @@
   </div>
 
   <script>
-  jQuery(function() {initialize(jQuery);});
+  jQuery(initialize);
   function initialize($) {
+    $('#scraper').click(function() {
+      startScraping();
+    });
+  }
+
+  function startScraping() {
     var calendarUrl = 'blackout_cal.html';
     $.get(calendarUrl, null, scrapeCalendarPage);
   }

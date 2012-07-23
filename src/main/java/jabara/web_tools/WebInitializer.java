@@ -42,7 +42,8 @@ public class WebInitializer implements ServletContextListener {
     private static void initializeJersey(final ServletContext pContext) {
         final ServletRegistration.Dynamic jerseyServlet = addServlet(pContext, ServletContainer.class);
         jerseyServlet.setInitParameter("com.sun.jersey.config.property.packages", "jabara.web_tools.rest");
-        jerseyServlet.setInitParameter("com.sun.jersey.api.json.POJOMappingFeature", Boolean.TRUE.toString());
+        // jerseyServlet.setInitParameter("javax.ws.rs.Application", ClasspathResourceConfig.class.getName());
+        // jerseyServlet.setInitParameter("com.sun.jersey.api.json.POJOMappingFeature", Boolean.TRUE.toString());
         jerseyServlet.addMapping("/rest/*");
     }
 }
