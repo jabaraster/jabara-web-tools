@@ -3,7 +3,10 @@
  */
 package jabara.web_tools.service;
 
+import jabara.web_tools.entity.BlackoutSchedule;
 import jabara.web_tools.entity.ExpandedCsvData;
+
+import java.util.List;
 
 import com.google.inject.ImplementedBy;
 
@@ -14,21 +17,17 @@ import com.google.inject.ImplementedBy;
 public interface IExpandedCsvDataService {
 
     /**
-     * 
-     */
-    final String TEXT_ENCODING = "UTF-8"; //$NON-NLS-1$
-
-    /**
      * @return CSVデータ.
      * @throws NotFound
      */
     ExpandedCsvData get() throws NotFound;
 
     /**
+     * @param pSchedules
      * @return
      * @throws NotFound
      */
-    ExpandedCsvData refresh() throws NotFound;
+    ExpandedCsvData refresh(List<BlackoutSchedule> pSchedules) throws NotFound;
 
     /**
      * @param pEntity

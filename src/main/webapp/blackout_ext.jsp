@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <script src="jquery-1.7.2.min.js"></script>
   <style>
-  #sendData {
+  #scheduleText {
     width: 80%;
     height: 20em;
   }
@@ -15,8 +15,8 @@
 
   <button id="scraper">スクレイピングの開始！</button>
 
-  <form action="${pageContext.request.contextPath}/rest/blackout/schedule">
-    <textarea id="sendData"></textarea>
+  <form method="post" action="${pageContext.request.contextPath}/rest/blackout/schedule.csv">
+    <textarea id="scheduleText" name="scheduleText"></textarea>
     <br />
     <input type="submit" value="サーバに登録" />
   </form>

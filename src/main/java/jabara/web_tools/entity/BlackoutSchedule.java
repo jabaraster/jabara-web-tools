@@ -40,7 +40,7 @@ public class BlackoutSchedule extends EntityBase<BlackoutSchedule> {
     /**
      * 
      */
-    @Column(nullable = false, length = 20)
+    @Column(name = "schedule_group", nullable = false, length = 20)
     protected String          group;
 
     /**

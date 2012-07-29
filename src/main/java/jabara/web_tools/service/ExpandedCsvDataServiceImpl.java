@@ -3,6 +3,7 @@
  */
 package jabara.web_tools.service;
 
+import jabara.web_tools.entity.BlackoutSchedule;
 import jabara.web_tools.entity.ExpandedCsvData;
 
 import java.io.BufferedReader;
@@ -12,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -47,26 +49,35 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
     }
 
     /**
-     * @see jabara.web_tools.service.IExpandedCsvDataService#refresh()
+     * @see jabara.web_tools.service.IExpandedCsvDataService#refresh(java.util.List)
      */
     @Override
-    public ExpandedCsvData refresh() throws NotFound {
+    public ExpandedCsvData refresh(final List<BlackoutSchedule> pSchedules) {
+        final EntityManager em = this.getEntityManager();
+        em.createQuery("delete from " + ExpandedCsvData.class.getSimpleName()).executeUpdate();
+
+        final StringBuilder sb = new StringBuilder();
+        for (final BlackoutSchedule s : pSchedules) {
+            em.persist(s);
+            sb.append("\"").append(new SimpleDateFormat("yyyy/MM/dd").format(s.getDate())).append("\"");
+            sb.append(",\"").append(new SimpleDateFormat("HH:mm").format(s.getStartTime())).append("\"");
+            sb.append(",\"").append(new SimpleDateFormat("HH:mm").format(s.getEndTime())).append("\"");
+            sb.append(",\"").append(s.getGroup()).append("\"");
+            sb.append(",\"").append(s.getPriority()).append("\"");
+            sb.append(LINE_SEPARATOR);
+        }
+
         try {
-            final ExpandedCsvData dbData = getFromDb();
-            final ExpandedCsvData newData = getFromWeb();
-            dbData.setData(newData.getData());
-            dbData.setLoaded(false);
-            dbData.setFromWeb(true);
-            update(dbData);
-            return dbData;
+            final ExpandedCsvData data = this.getFromDb();
+            data.setData(encode(sb));
+            this.update(data);
+            return data;
 
         } catch (final NoResultException e) {
-            return getFromWebAndInsert();
-
-        } catch (final IOException e) {
-            throw new NotFound(e);
-        } catch (final ParseException e) {
-            throw new NotFound(e);
+            final ExpandedCsvData data = new ExpandedCsvData();
+            data.setData(encode(sb));
+            em.persist(data);
+            return data;
         }
     }
 
@@ -144,6 +155,14 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
         }
     }
 
+    private static byte[] encode(final StringBuilder pBuilder) {
+        try {
+            return new String(pBuilder).getBytes(ExMediaType.TEXT_ENCODING);
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     private static List<String> expandGroup(final String pGroupToken) throws ParseException {
         final Pattern pat = Pattern.compile("([A-Z])([0-9]{1,2})"); //$NON-NLS-1$
         final Matcher mat = pat.matcher(pGroupToken);
@@ -181,7 +200,7 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
             sb.append(line).append(LINE_SEPARATOR);
         }
 
-        final byte[] data = new String(sb).getBytes(TEXT_ENCODING);
+        final byte[] data = new String(sb).getBytes(ExMediaType.TEXT_ENCODING);
         final ExpandedCsvData e = new ExpandedCsvData();
         e.setData(data);
         e.setFromWeb(true);

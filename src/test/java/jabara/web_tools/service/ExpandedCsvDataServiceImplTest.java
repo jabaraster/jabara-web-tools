@@ -2,9 +2,11 @@ package jabara.web_tools.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import jabara.web_tools.entity.BlackoutSchedule;
 import jabara.web_tools.entity.ExpandedCsvData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,10 +33,10 @@ public class ExpandedCsvDataServiceImplTest {
         final ExpandedCsvData secondData = service.get();
         assertThat(false, is(secondData.isFromWeb()));
 
-        final ExpandedCsvData refreshData = service.refresh();
+        final ExpandedCsvData refreshData = service.refresh(Collections.<BlackoutSchedule> emptyList());
         assertThat(true, is(refreshData.isFromWeb()));
 
-        service.refresh();
+        service.refresh(Collections.<BlackoutSchedule> emptyList());
     }
 
     /**

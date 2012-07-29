@@ -3,7 +3,10 @@
  */
 package jabara.web_tools.rest;
 
+import jabara.web_tools.entity.BlackoutSchedule;
 import jabara.web_tools.entity.ExpandedCsvData;
+import jabara.web_tools.service.ExMediaType;
+import jabara.web_tools.service.IBlackoutScheduleService;
 import jabara.web_tools.service.IExpandedCsvDataService;
 import jabara.web_tools.service.Injector;
 import jabara.web_tools.service.NotFound;
@@ -11,10 +14,14 @@ import jabara.web_tools.service.NotFound;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -32,25 +39,29 @@ import com.sun.jersey.multipart.FormDataParam;
 @Path("/blackout")
 public class BlackoutResource {
 
-    private static final String           CSV_PATH = "/schedule.csv"; //$NON-NLS-1$
+    private static final String            CSV_PATH = "/schedule.csv";                       //$NON-NLS-1$
 
-    private final IExpandedCsvDataService expandedCsvDataService;
+    private static final Random            _random  = new Random(System.currentTimeMillis());
+
+    private final IExpandedCsvDataService  expandedCsvDataService;
+    private final IBlackoutScheduleService blackoutScheduleService;
 
     /**
      * 
      */
     public BlackoutResource() {
         this.expandedCsvDataService = Injector.getInstance(IExpandedCsvDataService.class);
+        this.blackoutScheduleService = Injector.getInstance(IBlackoutScheduleService.class);
     }
 
     /**
      * @param pData
      * @param pFileDetail
      */
-    @SuppressWarnings({ "static-method", "nls" })
+    @SuppressWarnings( { "static-method", "nls" })
     @Path("/upload")
-    @Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ MediaType.TEXT_HTML })
+    @Consumes( { MediaType.MULTIPART_FORM_DATA })
+    @Produces( { MediaType.TEXT_HTML })
     @POST
     public void d( //
             @FormDataParam("image") final InputStream pData //
@@ -65,23 +76,41 @@ public class BlackoutResource {
     /**
      * @return 計画停電スケジュール.
      */
-    @Path("/schedule.csv")
-    @Consumes({ "text/csv", "text/plain", "text/comma-separated-values" })
-    @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING, "text/csv; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
+    @Path(CSV_PATH)
+    @Consumes( { "text/csv", "text/plain", "text/comma-separated-values" })
+    @Produces( { ExMediaType.TEXT_PLAIN, ExMediaType.TEXT_CSV })
     @GET
     public Response getExpandedSchedule(@QueryParam("nocache") final Boolean pNoCache) {
         try {
             final ExpandedCsvData data = this.expandedCsvDataService.get();
             if (data.isLoaded()) {
                 if (isTrue(pNoCache)) {
-                    return Response.ok(data.getData()).build();
+                    return Response.ok(data.getData()) //
+                            .lastModified(data.getUpdated()) //
+                            .build();
                 }
-                return Response.notModified().build();
+                return Response.notModified() //
+                        .lastModified(data.getUpdated()) //
+                        .build();
             }
             data.setLoaded(true);
             this.expandedCsvDataService.update(data);
 
-            return Response.ok(data.getData()).build();
+            return Response.ok(data.getData()) //
+                    .lastModified(data.getUpdated()) //
+                    .build();
+
+        } catch (final NotFound e) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    @Path(CSV_PATH)
+    @HEAD
+    public Response getHead() {
+        try {
+            final ExpandedCsvData data = this.expandedCsvDataService.get();
+            return Response.ok().lastModified(data.getUpdated()).build();
 
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
@@ -95,11 +124,13 @@ public class BlackoutResource {
      */
     @SuppressWarnings("static-method")
     @Path("scrape")
-    @Produces({ MediaType.TEXT_HTML })
+    @Produces( { MediaType.TEXT_HTML })
     @GET
     public InputStream loadFromQDenHtml(@QueryParam("path") final String pPath) throws IOException {
         try {
-            TimeUnit.MILLISECONDS.sleep(500); // 九電サイトへの負荷対策.
+            // 2s-5s待つ
+            final long timeout = (long) (_random.nextDouble() * 3000) + 2000;
+            TimeUnit.MILLISECONDS.sleep(timeout); // 九電サイトへの負荷対策.
         } catch (final InterruptedException e) {
             // 　処理なし
         }
@@ -110,12 +141,15 @@ public class BlackoutResource {
      * @return
      */
     @Path(CSV_PATH)
-    @Produces({ "text/plain; charset=" + IExpandedCsvDataService.TEXT_ENCODING })
+    @Produces( { ExMediaType.TEXT_CSV })
     @POST
-    public Response refresh() {
+    public Response refresh(@FormParam("scheduleText") final String pScheduleText) {
         try {
-            final ExpandedCsvData newData = this.expandedCsvDataService.refresh();
-            return Response.ok(newData.getData()).build();
+            final List<BlackoutSchedule> list = this.blackoutScheduleService.parse(pScheduleText);
+            final ExpandedCsvData newData = this.expandedCsvDataService.refresh(list);
+            return Response.ok(newData.getData()) //
+                    .lastModified(newData.getUpdated()) //
+                    .build();
 
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
