@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!doctype html>
 <head>
   <title>優先度抽出HTML</title>
@@ -14,7 +15,7 @@
 
   <button id="scraper">スクレイピングの開始！</button>
 
-  <form action="">
+  <form action="${pageContext.request.contextPath}/rest/blackout/schedule">
     <textarea id="sendData"></textarea>
     <br />
     <input type="submit" value="サーバに登録" />
@@ -23,8 +24,11 @@
   </div>
 
   <script>
+
+  var contextPath = '${pageContext.request.contextPath}';
+  
   jQuery(initialize);
-  function initialize($) {
+  function initialize() {
     $('#scraper').click(function() {
       startScraping();
     });
@@ -41,8 +45,8 @@
       log(href + 'をスクレイピング中...');
       var path = href.replace('http://www2.kyuden.co.jp/kt_search/index.php', '');
       var priorityUrl = 'rest/blackout/scrape?path=' + encodeURI(path);
-      $.get(priorityUrl, null, scrapePriorityPage);
-      return i < 3;
+      //$.get(priorityUrl, null, scrapePriorityPage);
+      return i < 0;
     });
   }
 
