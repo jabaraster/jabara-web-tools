@@ -134,6 +134,7 @@ public final class Injector {
 
                         } finally {
                             if (startTxThisFrame) {
+                                em.close();
                                 _emHolder.set(null);
                             }
                         }

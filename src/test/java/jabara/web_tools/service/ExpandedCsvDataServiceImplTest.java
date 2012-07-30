@@ -1,15 +1,7 @@
 package jabara.web_tools.service;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import jabara.web_tools.entity.BlackoutSchedule;
-import jabara.web_tools.entity.ExpandedCsvData;
-
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -18,37 +10,6 @@ import org.junit.Test;
  */
 @SuppressWarnings("static-method")
 public class ExpandedCsvDataServiceImplTest {
-
-    /**
-     * @throws NotFound
-     */
-    @SuppressWarnings("boxing")
-    @Test
-    public void _get_refresh() throws NotFound {
-        final IExpandedCsvDataService service = Injector.getInstance(IExpandedCsvDataService.class);
-
-        final ExpandedCsvData firstData = service.get();
-        assertThat(true, is(firstData.isFromWeb()));
-
-        final ExpandedCsvData secondData = service.get();
-        assertThat(false, is(secondData.isFromWeb()));
-
-        final ExpandedCsvData refreshData = service.refresh(Collections.<BlackoutSchedule> emptyList());
-        assertThat(true, is(refreshData.isFromWeb()));
-
-        service.refresh(Collections.<BlackoutSchedule> emptyList());
-    }
-
-    /**
-     * @throws Exception
-     */
-    @SuppressWarnings("boxing")
-    @Test
-    public void _getExpandedSchedule() throws Exception {
-        final List<String> list = ExpandedCsvDataServiceImpl.getExpandedScheduleCore();
-        final Set<String> set = new HashSet<String>(list);
-        assertThat(true, is(list.size() == set.size()));
-    }
 
     /**
      * @throws Exception

@@ -44,7 +44,7 @@ public class BlackoutScheduleServiceImpl extends DaoBase implements IBlackoutSch
 
     private static void parseOneSection(final BufferedReader pReader, final List<BlackoutSchedule> pList, final String pHeaderLine)
             throws IOException {
-        final Pattern pat = Pattern.compile("([0-9]{4})年([0-9]{1,2})月([0-9]{1,2})日（.曜日）([0-9]{1,2})時([0-9]{1,2})分～([0-9]{1,2})時([0-9]{1,2})分");
+        final Pattern pat = Pattern.compile("([0-9]{4})年([0-9]{1,2})月([0-9]{1,2})日（.曜日）([0-9]{1,2})時([0-9]{1,2})分～([0-9]{1,2})時([0-9]{1,2})分"); //$NON-NLS-1$
         final Matcher mat = pat.matcher(pHeaderLine);
         if (!mat.find()) {
             throw new IllegalStateException();
@@ -72,7 +72,7 @@ public class BlackoutScheduleServiceImpl extends DaoBase implements IBlackoutSch
     }
 
     private static void setGroupAndPriority(final BlackoutSchedule pSchedule, final String pLine) {
-        final Pattern pat = Pattern.compile("([0-9]{1,2})番目 ([A-Z][0-9]{1,2})サブグループ");
+        final Pattern pat = Pattern.compile("([0-9]{1,2})番目 ([A-Z][0-9]{1,2})サブグループ"); //$NON-NLS-1$
         final Matcher mat = pat.matcher(pLine);
         if (!mat.find()) {
             throw new IllegalStateException();

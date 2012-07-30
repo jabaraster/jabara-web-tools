@@ -18,7 +18,7 @@ public interface IBlackoutScheduleService {
 
     /**
      * @param pScheduleText
-     * @return
+     * @return -
      */
     List<BlackoutSchedule> parse(String pScheduleText);
 }

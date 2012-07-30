@@ -33,6 +33,9 @@ public class BlackoutSchedule extends EntityBase<BlackoutSchedule> {
     @Temporal(TemporalType.TIME)
     protected Date            startTime;
 
+    /**
+     * 
+     */
     @Column(nullable = false)
     @Temporal(TemporalType.TIME)
     protected Date            endTime;
@@ -122,6 +125,7 @@ public class BlackoutSchedule extends EntityBase<BlackoutSchedule> {
     /**
      * @see java.lang.Object#toString()
      */
+    @SuppressWarnings("nls")
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

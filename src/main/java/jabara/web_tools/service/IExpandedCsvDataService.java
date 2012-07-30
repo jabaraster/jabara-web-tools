@@ -24,7 +24,7 @@ public interface IExpandedCsvDataService {
 
     /**
      * @param pSchedules
-     * @return
+     * @return -
      * @throws NotFound
      */
     ExpandedCsvData refresh(List<BlackoutSchedule> pSchedules) throws NotFound;

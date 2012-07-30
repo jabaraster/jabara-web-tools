@@ -13,7 +13,9 @@
 </head>
 <body>
 
-  <button id="scraper">スクレイピングの開始！</button>
+  <button id="scraper7">7月分のスクレイピングの開始！</button>
+  <button id="scraper8">8月分のスクレイピングの開始！</button>
+  <button id="scraper9">9月分のスクレイピングの開始！</button>
 
   <form method="post" action="${pageContext.request.contextPath}/rest/blackout/schedule.csv">
     <textarea id="scheduleText" name="scheduleText"></textarea>
@@ -29,13 +31,22 @@
   
   jQuery(initialize);
   function initialize() {
-    $('#scraper').click(function() {
-      startScraping();
+    $('#scraper7').click(function() {
+      startScraping('/restriction/blackoutschedule');
+    });
+    $('#scraper8').click(function() {
+      startScraping('/restriction/blackoutschedule/1');
+    });
+    $('#scraper9').click(function() {
+      startScraping('/restriction/blackoutschedule/2');
     });
   }
 
-  function startScraping() {
-    var calendarUrl = 'blackout_cal.html';
+  var priorityPageScraperCount = 0;
+
+  function startScraping(pTargetPageUrlPath) {
+    log("スクレイピングを開始します。");
+    var calendarUrl = qdenUrl(pTargetPageUrlPath);
     $.get(calendarUrl, null, scrapeCalendarPage);
   }
 
@@ -44,27 +55,39 @@
       var href = $(e).attr('href');
       log(href + 'をスクレイピング中...');
       var path = href.replace('http://www2.kyuden.co.jp/kt_search/index.php', '');
-      var priorityUrl = 'rest/blackout/scrape?path=' + encodeURI(path);
-      //$.get(priorityUrl, null, scrapePriorityPage);
-      return i < 0;
+      var priorityUrl = qdenUrl(path);
+      ++priorityPageScraperCount;
+      $.get(priorityUrl, null, scrapePriorityPage);
+      //return i < 0;
     });
   }
 
   function scrapePriorityPage(pContent) {
-    appendDataLine($('span[style="font-size:1.2em;font-weight:bold;"]', pContent).text());
-    var groups = $('div[style="border:1px solid #999999;width:350px;padding:0.3em;float:left;line-height:2.2em;"] > p > a', pContent);
-    $('div[style="border:1px solid #FFFFFF;width:15%;padding:0.3em 0.5em;float:left;line-height:2.2em;"] > p', pContent).each(function(i, e) {
-      appendDataLine($(e).text() + ' ' + $(groups.get(i)).text());
-    });
+    try {
+      appendDataLine($('span[style="font-size:1.2em;font-weight:bold;"]', pContent).text());
+      var groups = $('div[style="border:1px solid #999999;width:350px;padding:0.3em;float:left;line-height:2.2em;"] > p > a', pContent);
+      $('div[style="border:1px solid #FFFFFF;width:15%;padding:0.3em 0.5em;float:left;line-height:2.2em;"] > p', pContent).each(function(i, e) {
+        appendDataLine($(e).text() + ' ' + $(groups.get(i)).text());
+      });
+    } finally {
+      --priorityPageScraperCount;
+      if (priorityPageScraperCount == 0) {
+        log("スクレイプ完了！");
+      }
+    }
   }
 
   var con = $('#console');
-  var dataArea = $('#sendData');
+  var dataArea = $('#scheduleText');
   function appendDataLine(pLine) {
     dataArea.append(pLine + '\n');
   }
   function log(s) {
     con.append(s + '<br/>');
+  }
+
+  function qdenUrl(pPath) {
+    return contextPath + '/rest/blackout/scrape?path=' + encodeURI(pPath)
   }
 
   </script>
