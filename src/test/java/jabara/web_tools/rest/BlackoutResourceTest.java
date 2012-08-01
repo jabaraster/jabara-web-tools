@@ -3,19 +3,14 @@
  */
 package jabara.web_tools.rest;
 
-import jabara.web_tools.TestHelper;
-import jabara.web_tools.service.ExMediaType;
-
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.GregorianCalendar;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateUtil;
 import org.junit.Test;
@@ -30,29 +25,23 @@ public class BlackoutResourceTest {
      * 
      * @throws IOException
      * @throws HttpException
-     * @throws InterruptedException
      * @throws DateParseException
      */
     @SuppressWarnings("static-method")
     @Test
-    public void _getHead() throws HttpException, IOException, InterruptedException, DateParseException {
+    public void _getHead() throws HttpException, IOException, DateParseException {
         final HttpClient client = new HttpClient();
         int responseCode;
 
-        final HeadMethod headMethod = new HeadMethod("http://localhost:8081/rest/blackout/schedule.csv"); //$NON-NLS-1$
-        responseCode = client.executeMethod(headMethod);
+        final GetMethod method = new GetMethod("http://localhost:8081/rest/blackout/schedule.csv"); //$NON-NLS-1$
+        method.addRequestHeader("If-Modified-Since", DateUtil.formatDate(new GregorianCalendar(1975, 9, 29).getTime())); //$NON-NLS-1$
+        //        method.addRequestHeader("If-Modified-Since", DateUtil.formatDate(new Date())); //$NON-NLS-1$
+        responseCode = client.executeMethod(method);
 
         System.out.println(responseCode);
-        System.out.println(DateUtil.parseDate(headMethod.getResponseHeader("Last-Modified").getValue())); //$NON-NLS-1$
-
-        TimeUnit.SECONDS.sleep(2);
-
-        final PostMethod postMethod = new PostMethod("http://localhost:8081/rest/blackout/schedule.csv"); //$NON-NLS-1$
-        postMethod.setRequestHeader("Content-Type", ExMediaType.TEXT_PLAIN); //$NON-NLS-1$
-        postMethod.setRequestBody(new NameValuePair[] { new NameValuePair("scheduleText", TestHelper.loadTestText()) }); //$NON-NLS-1$
-        responseCode = client.executeMethod(postMethod);
-        System.out.println(responseCode);
-        System.out.println(DateUtil.parseDate(postMethod.getResponseHeader("Last-Modified").getValue())); //$NON-NLS-1$
+        System.out.println(DateUtil.parseDate(method.getResponseHeader("Last-Modified").getValue())); //$NON-NLS-1$
+        System.out.println(method.getResponseHeader("Last-Modified").getValue()); //$NON-NLS-1$
+        System.out.println(method.getResponseBodyAsString());
     }
 
     @SuppressWarnings("unused")

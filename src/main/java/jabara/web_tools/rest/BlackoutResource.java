@@ -14,6 +14,7 @@ import jabara.web_tools.service.NotFound;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +27,14 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.httpclient.util.DateParseException;
+import org.apache.commons.httpclient.util.DateUtil;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -74,15 +80,33 @@ public class BlackoutResource {
     }
 
     /**
+     * @param pHeaders
      * @return 計画停電スケジュール.
      */
     @Path(CSV_PATH)
     @Consumes({ "text/csv", "text/plain", "text/comma-separated-values" })
     @Produces({ ExMediaType.TEXT_PLAIN, ExMediaType.TEXT_CSV })
     @GET
-    public Response getExpandedSchedule() {
+    public Response getExpandedSchedule(@Context final HttpHeaders pHeaders) {
         try {
             final ExpandedCsvData data = this.expandedCsvDataService.get();
+            final List<String> ifModifiedSinceStr = pHeaders.getRequestHeader("If-Modified-Since"); //$NON-NLS-1$
+            if (ifModifiedSinceStr != null && !ifModifiedSinceStr.isEmpty()) {
+                try {
+                    final Date ifModifiedSince = DateUtil.parseDate(ifModifiedSinceStr.get(0));
+                    if (data.getUpdated().after(ifModifiedSince)) {
+                        return Response.ok(data.getData()) //
+                                .lastModified(data.getUpdated()) //
+                                .build();
+                    }
+                    return Response.notModified() //
+                            .lastModified(data.getUpdated()) //
+                            .build();
+
+                } catch (final DateParseException e) {
+                    // 無視して次の処理へ.
+                }
+            }
             return Response.ok(data.getData()) //
                     .lastModified(data.getUpdated()) //
                     .build();

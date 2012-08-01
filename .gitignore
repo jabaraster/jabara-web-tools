@@ -1,2 +1,6 @@
 target
+hoge.jpage
+src/test/java/jabara/Sandbox.java
 src/test/resources/a.sql
+.gitignore~
+.gitignore.swp
