@@ -97,9 +97,12 @@ public class BlackoutResource {
                 try {
                     final Date ifModifiedSince = DateUtil.parseDate(ifModifiedSinceStr.get(0));
                     if (data.getUpdated().after(ifModifiedSince)) {
-                        return Response.ok(data.getData()) //
+                        return Response.ok(ifModifiedSinceStr.get(0) + "," + DateUtil.formatDate(data.getUpdated())) //
                                 .lastModified(data.getUpdated()) //
                                 .build();
+                        // return Response.ok(data.getData()) //
+                        // .lastModified(data.getUpdated()) //
+                        // .build();
                     }
                     return Response.notModified() //
                             .lastModified(data.getUpdated()) //
