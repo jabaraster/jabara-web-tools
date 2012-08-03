@@ -14,6 +14,7 @@ import jabara.web_tools.service.NotFound;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -127,6 +128,21 @@ public class BlackoutResource {
 
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    /**
+     * @return -
+     */
+    @Path("lastModified")
+    @GET
+    @Produces({ MediaType.TEXT_PLAIN })
+    public String getLastModified() {
+        try {
+            final ExpandedCsvData data = this.expandedCsvDataService.get();
+            return new SimpleDateFormat("yyyy/MM/dd HH:mm/SS").format(data.getUpdated()); //$NON-NLS-1$
+        } catch (final NotFound e) {
+            return "no data found."; //$NON-NLS-1$
         }
     }
 
