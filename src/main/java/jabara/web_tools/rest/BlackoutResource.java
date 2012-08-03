@@ -82,45 +82,6 @@ public class BlackoutResource {
     }
 
     /**
-     * @param pHeaders
-     * @return 計画停電スケジュール.
-     */
-    @Path(CSV_PATH)
-    @Consumes({ "text/csv", "text/plain", "text/comma-separated-values" })
-    @Produces({ ExMediaType.TEXT_PLAIN, ExMediaType.TEXT_CSV })
-    @GET
-    public Response getExpandedSchedule(@Context final HttpHeaders pHeaders) {
-        try {
-            final ExpandedCsvData data = this.expandedCsvDataService.get();
-            final List<String> ifModifiedSinceStr = pHeaders.getRequestHeader("If-Modified-Since"); //$NON-NLS-1$
-            if (ifModifiedSinceStr != null && !ifModifiedSinceStr.isEmpty()) {
-                try {
-                    final Date ifModifiedSince = DateUtil.parseDate(ifModifiedSinceStr.get(0));
-                    if (data.getUpdated().after(ifModifiedSince)) {
-                        return Response.ok(ifModifiedSinceStr.get(0) + "," + DateUtil.formatDate(data.getUpdated())) //
-                                .lastModified(data.getUpdated()) //
-                                .build();
-                        // return Response.ok(data.getData()) //
-                        // .lastModified(data.getUpdated()) //
-                        // .build();
-                    }
-                    return Response.notModified() //
-                            .lastModified(data.getUpdated()) //
-                            .build();
-
-                } catch (final DateParseException e) {
-                    // 無視して次の処理へ.
-                }
-            }
-            return Response.ok(data.getData()) //
-                    .lastModified(data.getUpdated()) //
-                    .build();
-        } catch (final NotFound e) {
-            return Response.status(Status.NOT_FOUND).build();
-        }
-    }
-
-    /**
      * @return -
      */
     @Path(CSV_PATH)
@@ -144,9 +105,45 @@ public class BlackoutResource {
     public String getLastModified() {
         try {
             final ExpandedCsvData data = this.expandedCsvDataService.get();
-            return TimeZone.getDefault() + "   " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(data.getUpdated()); //$NON-NLS-1$
+            return TimeZone.getDefault() + "   " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(data.getUpdated());
         } catch (final NotFound e) {
             return "no data found."; //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * @param pHeaders
+     * @return 計画停電スケジュール.
+     */
+    @Path(CSV_PATH)
+    @Consumes({ "text/csv", "text/plain", "text/comma-separated-values" })
+    @Produces({ ExMediaType.TEXT_PLAIN, ExMediaType.TEXT_CSV })
+    @GET
+    public Response getScheduleCsv(@Context final HttpHeaders pHeaders) {
+        try {
+            final ExpandedCsvData data = this.expandedCsvDataService.get();
+            final List<String> ifModifiedSinceStr = pHeaders.getRequestHeader("If-Modified-Since"); //$NON-NLS-1$
+            if (ifModifiedSinceStr != null && !ifModifiedSinceStr.isEmpty()) {
+                try {
+                    final Date ifModifiedSince = DateUtil.parseDate(ifModifiedSinceStr.get(0));
+                    if (data.getLastModified().after(ifModifiedSince)) {
+                        return Response.ok(data.getData()) //
+                                .lastModified(data.getUpdated()) //
+                                .build();
+                    }
+                    return Response.notModified() //
+                            .lastModified(data.getUpdated()) //
+                            .build();
+
+                } catch (final DateParseException e) {
+                    // 無視して次の処理へ.
+                }
+            }
+            return Response.ok(data.getData()) //
+                    .lastModified(data.getUpdated()) //
+                    .build();
+        } catch (final NotFound e) {
+            return Response.status(Status.NOT_FOUND).build();
         }
     }
 

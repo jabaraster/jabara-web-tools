@@ -43,7 +43,7 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
      */
     @Override
     public ExpandedCsvData refresh(final List<BlackoutSchedule> pSchedules) {
-        final EntityManager em = this.getEntityManager();
+        final EntityManager em = getEntityManager();
         em.createQuery("delete from " + BlackoutSchedule.class.getSimpleName()).executeUpdate(); //$NON-NLS-1$
 
         final StringBuilder sb = new StringBuilder();
@@ -58,9 +58,9 @@ public class ExpandedCsvDataServiceImpl extends DaoBase implements IExpandedCsvD
         }
 
         try {
-            final ExpandedCsvData data = this.getFromDb();
+            final ExpandedCsvData data = getFromDb();
             data.setData(encode(sb));
-            this.update(data);
+            update(data);
             return data;
 
         } catch (final NoResultException e) {
