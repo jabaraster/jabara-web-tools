@@ -17,8 +17,8 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.Consumes;
@@ -141,7 +141,7 @@ public class BlackoutResource {
     public String getLastModified() {
         try {
             final ExpandedCsvData data = this.expandedCsvDataService.get();
-            return Locale.getDefault() + "   " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(data.getUpdated()); //$NON-NLS-1$
+            return TimeZone.getDefault() + "   " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(data.getUpdated()); //$NON-NLS-1$
         } catch (final NotFound e) {
             return "no data found."; //$NON-NLS-1$
         }
