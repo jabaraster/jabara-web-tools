@@ -89,7 +89,7 @@ public class BlackoutResource {
     public Response getHead() {
         try {
             final ExpandedCsvData data = this.expandedCsvDataService.get();
-            return Response.ok().lastModified(data.getUpdated()).build();
+            return Response.ok().lastModified(data.getLastModified()).build();
 
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
@@ -105,7 +105,7 @@ public class BlackoutResource {
     public String getLastModified() {
         try {
             final ExpandedCsvData data = this.expandedCsvDataService.get();
-            return TimeZone.getDefault() + "   " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(data.getUpdated());
+            return TimeZone.getDefault() + "   " + new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS").format(data.getLastModified()); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (final NotFound e) {
             return "no data found."; //$NON-NLS-1$
         }
@@ -128,11 +128,11 @@ public class BlackoutResource {
                     final Date ifModifiedSince = DateUtil.parseDate(ifModifiedSinceStr.get(0));
                     if (data.getLastModified().after(ifModifiedSince)) {
                         return Response.ok(data.getData()) //
-                                .lastModified(data.getUpdated()) //
+                                .lastModified(data.getLastModified()) //
                                 .build();
                     }
                     return Response.notModified() //
-                            .lastModified(data.getUpdated()) //
+                            .lastModified(data.getLastModified()) //
                             .build();
 
                 } catch (final DateParseException e) {
@@ -140,7 +140,7 @@ public class BlackoutResource {
                 }
             }
             return Response.ok(data.getData()) //
-                    .lastModified(data.getUpdated()) //
+                    .lastModified(data.getLastModified()) //
                     .build();
         } catch (final NotFound e) {
             return Response.status(Status.NOT_FOUND).build();
@@ -179,7 +179,7 @@ public class BlackoutResource {
             final List<BlackoutSchedule> list = this.blackoutScheduleService.parse(pScheduleText);
             final ExpandedCsvData newData = this.expandedCsvDataService.refresh(list);
             return Response.ok(newData.getData()) //
-                    .lastModified(newData.getUpdated()) //
+                    .lastModified(newData.getLastModified()) //
                     .build();
 
         } catch (final NotFound e) {
